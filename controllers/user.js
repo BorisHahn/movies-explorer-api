@@ -9,59 +9,63 @@ const UnauthorizedError = require('../errors/unauthorizedError');
 
 const { created } = require('../utils/const');
 
-module.exports.getProfileInfo = (req, res, next) => {
-  User.findOne({ id: req.user._id })
-    .then((user) => res.send(user))
-    .catch((err) => {
-      next(err);
-    });
+module.exports.getProfileInfo = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ id: req.user._id });
+    res.send(user);
+  } catch (err) {
+    next(err);
+  }
 };
 
-module.exports.signUp = (req, res, next) => {
+module.exports.signUp = async (req, res, next) => {
   const {
     name,
     email,
     password,
   } = req.body;
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create({
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    const user = await User.create({
       name,
       email,
       password: hash,
-    }))
-    .then((user) => res.status(created).send(user))
-    .catch((err) => {
-      if (err.code === 11000) {
-        next(new ConflictError('Пользователь с данным email уже зарегестрирован'));
-      } else if (err.name === 'ValidationError') {
-        next(new BadRequest('Переданы некорректные данные при создании пользователя'));
-      } else {
-        next(err);
-      }
     });
+    res.status(created).send(user);
+  } catch (err) {
+    if (err.code === 11000) {
+      next(new ConflictError('Пользователь с данным email уже зарегестрирован'));
+    } else if (err.name === 'ValidationError') {
+      next(new BadRequest('Переданы некорректные данные при создании пользователя'));
+    } else {
+      next(err);
+    }
+  }
 };
 
-module.exports.signIn = (req, res, next) => {
+module.exports.signIn = async (req, res, next) => {
   const { email, password } = req.body;
-  return User.findUser(email, password)
-    .then((user) => {
-      const token = jwt.sign(
-        { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SEC : 'dev-secret',
-        // JWT_SEC,
-        { expiresIn: '7d' },
-      );
-      res
-        .cookie('jwt', token, {
-          maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
-          sameSite: true,
-        })
-        .send({ email });
-    })
-    .catch((err) => {
-      next(new UnauthorizedError(err.message));
-    });
+  try {
+    const user = await User.findUser(email, password);
+    const token = jwt.sign(
+      { _id: user._id },
+      NODE_ENV === 'production' ? JWT_SEC : 'dev-secret',
+      { expiresIn: '7d' },
+    );
+    res
+      .cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+        sameSite: true,
+      })
+      .send({ email });
+  } catch (err) {
+    next(new UnauthorizedError(err.message));
+  }
+};
+
+module.exports.signOut = (req, res) => {
+  res.clearCookie('jwt');
 };
 
 module.exports.editProfileInfo = async (req, res, next) => {
