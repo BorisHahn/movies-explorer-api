@@ -4,10 +4,11 @@ const auth = require('../middlewares/auth');
 const NotFoundError = require('../errors/notFoundError');
 const movieRouter = require('./movie');
 const { signUp, signIn, signOut } = require('../controllers/user');
+const { validSignUpData, validSignInData } = require('../utils/validation/validUserData');
 
 // роуты, не требующие авторизации
-router.post('/signin', signIn);
-router.post('/signup', signUp);
+router.post('/signin', validSignInData, signIn);
+router.post('/signup', validSignUpData, signUp);
 
 // роуты, которым авторизация нужна
 router.use('/users', auth, userRouter);

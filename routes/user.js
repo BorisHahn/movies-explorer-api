@@ -3,8 +3,9 @@ const {
   getProfileInfo,
   editProfileInfo,
 } = require('../controllers/user');
+const { validEditProfileInfoData } = require('../utils/validation/validUserData');
 
 userRouter.get('/me', getProfileInfo);
-userRouter.patch('/me', editProfileInfo);
+userRouter.patch('/me', validEditProfileInfoData, editProfileInfo);
 
 module.exports = userRouter;
