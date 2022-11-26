@@ -6,7 +6,7 @@ module.exports.validCreateMovieData = celebrate({
     country: Joi.string().required(),
     director: Joi.string().required(),
     duration: Joi.number().required(),
-    year: Joi.number().required(),
+    year: Joi.string().required(),
     description: Joi.string().required(),
     image: Joi.string().required().pattern(URL_REG),
     trailerLink: Joi.string().required().pattern(URL_REG),
