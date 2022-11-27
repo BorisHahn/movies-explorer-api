@@ -45,7 +45,7 @@ module.exports.deleteMovie = async (req, res, next) => {
     if (deletedMovie.owner.toString() !== req.user._id) {
       throw new ForbiddenError('Чужие фильмы удалению не подлежат');
     }
-    deletedMovie.remove();
+    await deletedMovie.remove();
     res.send(deletedMovie);
   } catch (err) {
     if (err.name === 'CastError') {
