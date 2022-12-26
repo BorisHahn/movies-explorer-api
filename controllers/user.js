@@ -1,13 +1,13 @@
 const { NODE_ENV, JWT_SEC } = process.env;
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/user');
-const NotFoundError = require('../errors/notFoundError');
-const BadRequest = require('../errors/badRequestError');
-const ConflictError = require('../errors/conflctError');
-const UnauthorizedError = require('../errors/unauthorizedError');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
+const NotFoundError = require("../errors/notFoundError");
+const BadRequest = require("../errors/badRequestError");
+const ConflictError = require("../errors/conflctError");
+const UnauthorizedError = require("../errors/unauthorizedError");
 
-const { created } = require('../utils/const');
+const { created } = require("../utils/const");
 
 module.exports.getProfileInfo = async (req, res, next) => {
   try {
@@ -19,11 +19,7 @@ module.exports.getProfileInfo = async (req, res, next) => {
 };
 
 module.exports.signUp = async (req, res, next) => {
-  const {
-    name,
-    email,
-    password,
-  } = req.body;
+  const { name, email, password } = req.body;
   try {
     const hash = await bcrypt.hash(password, 10);
     const user = await User.create({
@@ -34,9 +30,13 @@ module.exports.signUp = async (req, res, next) => {
     res.status(created).send(user);
   } catch (err) {
     if (err.code === 11000) {
-      next(new ConflictError('Пользователь с данным email уже зарегестрирован'));
-    } else if (err.name === 'ValidationError') {
-      next(new BadRequest('Переданы некорректные данные при создании пользователя'));
+      next(
+        new ConflictError("Пользователь с данным email уже зарегестрирован")
+      );
+    } else if (err.name === "ValidationError") {
+      next(
+        new BadRequest("Переданы некорректные данные при создании пользователя")
+      );
     } else {
       next(err);
     }
@@ -49,14 +49,15 @@ module.exports.signIn = async (req, res, next) => {
     const user = await User.findUser(email, password);
     const token = jwt.sign(
       { _id: user._id },
-      NODE_ENV === 'production' ? JWT_SEC : 'dev-secret',
-      { expiresIn: '7d' },
+      NODE_ENV === "production" ? JWT_SEC : "dev-secret",
+      { expiresIn: "7d" }
     );
     res
-      .cookie('jwt', token, {
+      .cookie("jwt", token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
         sameSite: true,
+        secure: true,
       })
       .send({ email });
   } catch (err) {
@@ -65,7 +66,8 @@ module.exports.signIn = async (req, res, next) => {
 };
 
 module.exports.signOut = (req, res) => {
-  res.clearCookie('jwt');
+  res.clearCookie("jwt");
+  res.end();
 };
 
 module.exports.editProfileInfo = async (req, res, next) => {
@@ -75,18 +77,22 @@ module.exports.editProfileInfo = async (req, res, next) => {
     const editUser = await User.findByIdAndUpdate(
       req.user._id,
       { name, email },
-      { new: true, runValidators: true },
+      { new: true, runValidators: true }
     );
     if (!editUser) {
-      throw new NotFoundError('Запрашиваемый пользователь не найден');
+      throw new NotFoundError("Запрашиваемый пользователь не найден");
     } else {
       res.send(editUser);
     }
   } catch (err) {
     if (err.code === 11000) {
-      next(new ConflictError('Пользователь с данным email уже зарегестрирован'));
-    } else if (err.name === 'ValidationError') {
-      next(new BadRequest('Переданы некорректные данные при создании пользователя'));
+      next(
+        new ConflictError("Пользователь с данным email уже зарегестрирован")
+      );
+    } else if (err.name === "ValidationError") {
+      next(
+        new BadRequest("Переданы некорректные данные при создании пользователя")
+      );
     } else {
       next(err);
     }
