@@ -19,6 +19,7 @@ module.exports.createMovie = async (req, res, next) => {
       owner: req.user._id,
       movieId: req.body.movieId,
     });
+
     if (checkedMovie) {
       throw new ForbiddenError('Этот фильм уже сохранен');
     }
