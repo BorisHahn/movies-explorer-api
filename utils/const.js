@@ -3,6 +3,8 @@ module.exports.URL_REG = /(https?:\/\/)(w{3}\.)?(((\d{1,3}\.){3}\d{1,3})|((\w-?)
 module.exports.allowedCors = [
   'https://gaidukevich.movie.nomoredomains.club',
   'http://gaidukevich.movie.nomoredomains.club',
+  'gaidukevich.movie.nomoredomains.club',
+  'localhost:3001',
   'https://localhost:3001',
   'http://localhost:3001',
 ];
